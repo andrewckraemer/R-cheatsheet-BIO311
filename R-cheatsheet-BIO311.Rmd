@@ -1,6 +1,14 @@
 ---
-title: "R Cheatsheet BIO311"
-output: html_document
+title: "R cheatsheet"
+author: "Created by: Emily Harders and Andrew Kraemer"
+date: "Last edited: 8 February 2022"
+output: 
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+  pdf_document:
+    toc: no
 ---
 
 ```{r setup, include=FALSE}
