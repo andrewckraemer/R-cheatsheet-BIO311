@@ -1,0 +1,547 @@
+---
+title: "R Cheatsheet BIO311"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+#install.packages("tinytex")
+#library(tinytex)
+#install.packages("mosaic") 
+#include=FALSE means that code and output wil be hidden from final document, but code will still run. (eval=FALSE will make the code not run).
+library(mosaic)
+```
+
+
+# READING IN DATA
+
+### read.csv()
+The `read.csv` function takes a csv file from your computer and uploads it into R
+```{r, echo=FALSE}
+bumpusdata<-read.csv("BIO311_data_bumpus.csv")
+males<-subset(bumpusdata, bumpusdata$sex=="male")
+females<-subset(bumpusdata, bumpusdata$sex=="female")
+```
+
+```{r, eval=FALSE, error=FALSE}
+bumpusdata<-read.csv("BIO311_data_bumpus.csv")
+```
+
+### rm(list=ls())
+`rm(list=ls())` clears R's memory, clearing anything you have named, or any other code you have run.
+
+### getwd()
+The `getwd()` function will tell you what working directory is running in R. Great for trouble-shooting
+
+### setwd()
+On a Mac, I prefer to use command+D to set the working directory, but this code works if your computer is being stubborn or you need to change your working directory for a specific section
+
+```{r, eval=FALSE, error=FALSE}
+setwd("~/Desktop/Biostats/Files")
+```
+
+# MATRIX MANIPULATION
+### matrix(c( )nrow= )
+The `matrix(c( ), nrow= )` function is used to create a matrix within the c() function list the numbers down the columns of the matrix
+```{r}
+a<-matrix(c(1,2,3,4,5,6,7,8,9,10,11,12,13,14), nrow=2)
+a
+```
+
+### t()
+The `t()` function transposes the matrix, so column 1 -> row 1, column 2 -> row 2, column 3 -> row 3, etc. in the transposed matrix.
+
+Before transpose
+```{r}
+b<-matrix(c(2,4,6,8,10,12,14,16,18,20,22,24,26,28), nrow=2)
+b
+```
+
+After transpose
+```{r}
+tb<-t(b) 
+tb
+```
+
+### cbind()
+The function `cbind()` allows you to add two matrices together by the columns (pushing matrices together side-by-side)
+```{r}
+cbind(a,b)
+```
+
+### rbind()
+The function `rbind()` allows you to add two matrices together by the rows. (stacking matrices on top of each other)
+```{r}
+rbind(a,b)
+```
+
+### is.matrix
+`is.matrix` function "asks" R if it is understanding an object/list as a matrix. 
+
+* An output of TRUE means that the object is being read as a matrix
+* An output of FALSE means that the object is being NOT read as a matrix
+```{r}
+is.matrix(a)
+```
+
+### as.matrix
+`as.matrix` function "commands" R to understanding an object/list as a matrix, even if it is not supposed to be a matrix.
+
+Originally, "not_M" is not being read as a matrix
+```{r}
+not_M<-c(1,2,3,4,5,6,7,8,9,1,0,11,12)
+is.matrix(not_M)
+```
+
+...but after using as.matrix, not_M is being read as a matrix.
+```{r}
+new_not_M<-as.matrix(not_M)
+is.matrix(new_not_M)
+```
+
+
+
+### %*%    
+
+The `%*%` function multiplies two matrices together
+```{r}
+a%*%tb
+```
+
+# MANIPULATING DATA
+
+### $
+The `$` isn't a function, but it is very useful because it allows you to isolate a column from a matrix.
+```{r}
+bumpusdata$sex
+```
+
+```{r}
+bumpusdata$wgt
+```
+
+### subset()
+The `subset()` function allows you to create a more specific matrix from a larger one, based on one variable. For example, the "males" subset below, sifts through "bumpusdata" and picks out all the individuals whose sex is male.
+```{r}
+males<-subset(bumpusdata, bumpusdata$sex=="male")
+```
+
+### head()
+The `head()` function lets you see the title of each column and the first 6 rows of the datasheet
+```{r}
+head(males)
+```
+
+### length()
+The `length()` function finds the length of a vector. Uou have to specify a column, because if you include an entire matrix (with rows **and** columns) within the argument R will only count the number of columns.
+
+* You have to pair males, with survival (or any other column in bumpusdata), otherwise R will count horizontally (the number of coumns), instead of counting the number of rows.
+    + There are 87 males
+```{r}
+length(males$surv)
+```
+
+### summary()
+The `summary()`function allows you to view descritive statistics from your dataset. 
+```{r}
+summary(males$wgt)
+```
+
+### c()
+The `c()` function allows you to link together a string of individual (numbers, colors, labels, etc.) to create a vector
+
+* When creating a vector with words, you need to put each word into quotations.
+```{r}
+age<-c(11,14,12,9,11,16,8,10,13,6,5)
+names<-c("Sally","Mark","Jeff", "Bill", "Sarah", "Sam", "Karen", "Krista", "Amy", "Mathew", "Caroline")
+```
+
+```{r}
+age
+names
+```
+
+### paste()
+The `paste()` function takes two identifying factors of an individual, and combines them together into one identifying factor.
+```{r}
+class<-paste(age,names)
+class
+```
+
+### rep()
+The `rep()` function repeats a specific number or word as a vector a specific number of times.
+
+* This function repeats the word "RED", "BLUE", and "YELLOW" 25 times each.
+```{r}
+c(rep("RED",25), rep("BLUE",25), rep("YELLOW", 25))
+```
+
+### which()
+The `which()` function will tell you the position of numbers in a vector that satisfy a certain condition
+
+* Say we have 9 children in a single file line. The first child is 12 years old, the second is 11 years old, etc. Each child has a specific spot in relation to the other children. Using the which() function I can find the position of children over the age of 10. There are 6 children that are over the age of 10
+
+`which(vector,condition,value)`
+```{r}
+children<-c(12,11,13,18,9,11,7,5,15)
+which(children>=10)
+```
+By combining the which() and length() functions I can find the total number of children that are   over (or under using <=) the age of 10.
+    
+```{r}
+length(which(children>=10))
+```
+
+### set.seed() and rnorm()
+`set.seed` is R's random number generator, this is useful for creating simulations or random objects that can be **reproduced**
+`rnorm()` generates a vector of normally distributed random numbers. 
+
+* by combining set.seed() and rnorm(), you can create unique set of normally distrubued numbers.  
+    * The semicolon allows you to perform two "lines of code" on a single line. It is important not to overuse this function, it is much easier to stay organized in R when using seperate lines for seperate functions.
+    
+Below is simulated data showing the ages of residents in two retirement homes
+```{r}
+set.seed(12345); retire1_data<-rnorm(n=1000,mean=90, sd=3.3)
+set.seed(54321); retire2_data<-rnorm(n=1000,mean=86, sd=5.1)
+```
+
+### tapply()
+Using the `tapply()` function requires continuous data,the categories and the calculation you want to do. tapply(continuous, categories, function)
+
+Using the simulated data for ages of residents in two retirement homes, we can find the mean of the two goups using the tapply function  
+
+* It is important to notice how retirement_ages and groups are the same length (meaning they both have 1000 individuals)
+```{r}
+retirement_ages<-c(retire1_data, retire2_data)
+groups<-c(rep("retire1",1000), rep("retire2",1000))
+tapply(retirement_ages, groups, mean)
+```
+
+### sample()
+the `sample()` function can take a sample from a data set. In this case we have a bowl with 15 red marbles and 20 blue marbles  
+
+sample(dataset, number of individuals in each sample)
+```{r}
+bowl<-c(rep("RED", 15), rep("BLUE", 20))
+sample(bowl, 5)
+```
+
+
+### loops
+Here is the general "formula" for loops
+
+**output<-NULL**  
+**n<- #number of times the loop runs**  
+**for(i in 1:n){**  
+  **#tasks...enter code you want to run repeatedly**  
+  **output<-c(output, task result) #this line puts the outputs in a list**  
+**}**
+
+For example, say I have a bowl of 500 seeds with an average mass of 50 mg. What is the probability that if I sample 2 seeds from the bowl, the average will be greater than 50?
+```{r}
+set.seed(2); seeds<-rnorm(n=500,mean=50,sd=10)
+safe<-NULL
+n<-100
+for(i in 1:n){
+  two_seeds<-sample(seeds, 2)
+  avg.seed.wgt<-mean(two_seeds)
+  safe<-c(safe, avg.seed.wgt)
+}
+
+safe
+
+#Outside the loop, you can figure out the probability of pair of seeds being over 50 milligrams
+
+sum(safe>=50)/n
+```
+From our answer we can see that 53% of the seeds sampled had a mean greater than the population mean
+
+### table()
+The `table()` function builds a contingency table of the counts for each combination of categorical factors
+```{r}
+bumpustable<-table(bumpusdata$sex, bumpusdata$surv)
+bumpustable
+```
+
+# TESTING ASSUMPTIONS
+## Normality
+### qqnorm()
+The `qqrnorm()` is a normality visualization that creates a scatter plot of your data vector against expected values of data if they  were *normally distributed* about the mean. If the data is normally distributed, the data will be in a straight linear line.
+
+For example, the male bird weight from the bumpus data. (the "males" subset was made previously)
+
+```{r}
+qqnorm(males$wgt)
+```
+
+### shapiro.test()
+The Shapiro-Wilk tests if a data vector is normally distributed. If the test is significant, then the data do NOT come from a normally distributed population. Remember this by thinking that the data is "significantly different from a normal population"
+
+For example, the male bird weight from the bumpus data.
+```{r}
+shapiro.test(males$wgt)
+```
+The male bird weights from the bumpus data is NOT normally distribued because we got a significant shapiro-wilk test.
+
+## Equal variance
+### var.test()
+When the data are normal, the F-test compares the variances of 2 groups. If the test is significant, the variances of the two groups are NOT equal. Remember this by thinking that the data is "significantly different from having equal variance." The F-test can only compare two groups.
+
+For example, the male and female bird weight from the bumpus data.
+```{r}
+var.test(males$wgt,females$wgt)
+```
+The test is NOT signfificant, so the two data sets have equal variance.
+
+### leveneTest()
+When the data are NOT normal, the levene test compares the variances between 2+ groups. If the test is significant, the variances of the groups are NOT equal
+
+To use the levene test, you have to first, download the package "car".
+```{r, message=FALSE}
+# install.packages('car')
+library(car)
+```
+For example, the male weight (y) and male survival (x) from the bumpus data.
+```{r}
+leveneTest(males$wgt~males$surv)
+```
+The result from the levene test is not significant so the groups (male alive and male dead) have equal variances.
+
+
+# INFERENTIAL STATISTICS
+
+### dbinom()
+`dbinom(x, size, prob)`
+**x= a vector of numbers, size=number of trials, prob= probability of success for each trial**  
+Using a bionomial probability distribution, you can use the dbinom() function to calculate the probability of exactly one outcome under that null distribution.
+
+* Returning to our simulated retirement home data, I want to know if I knock on 20 doors in the retirement home, what are the chances that exactly 5 95-year-olds will answer their door (The probability of success i.e. finding a 95-year-old is 0.055)? 
+```{r}
+dbinom(5,20, 0.055)
+```
+NOTE: this is NOT a p=value, but a probability of a very specific outcome (finding exactly 20 95-year-olds out of the 1000 residents)
+
+### binom.test()
+`binom.test(number of sucesses, number of trials)`   
+p=expected/hypothesized probability of success, alternative="two.sided" "greater" or "less")**
+
+You can use binom.test() function to calculate the probability of success under a binomial probability distribution. Where dbinom() only calculates the probability of one specific outcome/sucess, binom.test() calculates a range of outcomes that are all considered a success.
+
+* Again returning to the retirement home data, if I knock on 20 doors in the retirement home, what are the chances that I will find five people who are 95-years-old OR OLDER will answer their door (The probability of success i.e. finding a 95-year-old is 0.061)? 
+```{r}
+binom.test(5, 20, p=0.061, alternative="greater")
+```
+
+### chisq.test()
+`chisq.test(x, p=)` is a chi-squared goodness-of-fit test (where x is data and p is null probability)
+
+* An example of this the different amounts of each color of skittle in the bag. (blue=103, red=61, green=55, orange=64, yellow=77)
+```{r}
+chisq.test(c(103,61,55,64,77), p=c(0.2,0.2,0.2,0.2,0.2))
+```
+chisq.test(x) is a chi-squared test-of-association (where x is the data)
+
+* Looking back to the bumpus data, did sex of the bird influence if it lived or died? We can answer this using a chi-squared test-of-association. (The expected probability is derived from the observed data, so thats why its not in the function)
+```{r}
+bumpustable<-table(bumpusdata$sex, bumpusdata$surv)
+chisq.test(bumpustable)
+```
+
+###g.test()
+Similar to a chi-squared test, but... useful for complicated experimental design
+ex: null hypothesis is a particular association
+Does not function well with small sample sizes
+Use the same degrees of freedom as with chi-squared
+    *You can set your expected frequencies in a way you can't with chi-squared
+G=2(Obs*ln(O-E))
+
+
+### t.test()
+Unsurprisingly, the function, t.test is used to perform a t-test on a dataset. A t-test can determine if there is a significant difference between the means of two goups (with continuous data).  
+
+There are 3 different types of t-tests:     
+
+***One-sample t-test** Also called the "Goodness of Fit t-test." How the population mean compares to some hypothesized value. Example: Imagine we want to compare this years flow of the Nile river compared to the average flow over the last 20 years (800.53)  
+  * (The dataset Nile is pre-loaded into R)
+    ```{r}
+Nile_past<-800.53
+t.test(Nile, mu=800.53)
+```
+Based on this one-sample t.test, there is a significant difference between the mean flow of the Nile river this year, to the mean over the last 20 years.
+
+**Two-sample t-test** How the means of two groups are different. For example, if we want to see if there is a significant difference in the weight's of crickets after feeding them either food-x or food-y  
+
+* (The dataset randu is pre-loaded into R)
+    
+```{r}
+t.test(randu$x,randu$y)
+```
+Based on this two-sample t.test, there is a significant difference between the weights of the crickets under the two different food groups.  
+
+**Paired t-test** Determines whether the mean of two different groups is 0 (null hypothesis) or not (alternative). For example, the number of pimples before and after a cream is applied from a dermatologiest.
+
+```{r}
+set.seed(4); before_cream<-rnorm(10, mean=10, sd=6 )
+set.seed(4); after_cream<-rnorm(10, mean=9, sd=7)
+t.test(before_cream, after_cream, paired=TRUE)
+```
+Based on this paired t.test, there is NO significant difference between the number of pimples before and after the cream. Maybe time to find a new dermatologist...
+
+### summary(aov())
+The `summary(aov())` function above us used to conduct and ANOVA (Analysis of Variance) which is a test that uses the difference in variation to see if the mean between groups are different  
+
+* Unlike the two-sample t.test, you can have more than two groups
+
+* For example, determing if plants have different CO2 intake based on their type (Quebec or Mississippi) AND treatment (chilled or nonchilled)  
+
+* **IMPORTANT- ANOVA's do NOT tell you WHICH of the groups are different, only that a difference exists between at least two of the groups.**  
+
+    + CO2 is a preloaded dataset in R
+    
+```{r}
+PLANT<-paste(CO2$Type, CO2$Treatment)
+summary(aov(CO2$uptake~PLANT))
+```
+
+### TukeyHSD(aov()) 
+A **Tukey test** must be used to identify the groups that have a significant difference. The output is a list of p-values of the differences between each of the pairings.
+```{r}
+TukeyHSD(aov(CO2$uptake~PLANT))
+```
+Focusing on the P values in the reults you can see there is a significant differene between all of the groups except between Quebec nonchilled-Quebec chilled (p=0.4727)
+
+
+# PLOTTING DATA
+### hist()
+The `hist()` function creates a histogram of the weight of male birds.
+```{r}
+hist(males$wgt)
+```
+
+### boxplot()
+Creates a boxplot of bird weight and "male alive" "male dead" "female alive" "female dead"  
+
+* The generic formula for a boxplot is `boxplot(y~x)`
+    + y= continuous
+    + x= categorical
+    
+Notice the paste function!
+```{r}
+y<-bumpusdata$wgt
+x<-paste(bumpusdata$surv,bumpusdata$sex)
+boxplot(y~x)
+```
+
+### barplot()
+Plot with a categorical and continuous variables
+```{r}
+barplot(c(223,251,317,636,766,607,607), main="Pages in Harry Potter books", ylab="Pages", xlab="Books", names=c("PS","CS","PA","GF","OP","HBP","DH"))
+```
+
+
+
+# PLOT MODIFIERS
+### main=
+The `main=` modifier titles the plot
+```{r}
+boxplot(y~x, main="Bird weight by sex and survival")
+```
+
+### ylab=
+The `ylab` modifier labels the y-axis
+```{r}
+boxplot(y~x, main="Bird weight by sex and survival", ylab="Bird weight")
+```
+
+### xlab=
+The `xlab=` modifier labels the x-axis
+```{r}
+boxplot(y~x, main="Bird weight by sex and survival", ylab="Bird weight", xlab="Groups")
+```
+
+### xlim=
+The `xlim=` modifier allows you to change the limits of the x-axis
+```{r}
+hist(males$wgt, xlim=c(20,35))
+```
+
+### ylim=
+The `ylim=` modifier allows you to change the limits of the x-axis. Here I increased the y-axis to 40
+```{r}
+hist(males$wgt, ylim=c(0 ,40))
+```
+
+### col=
+The `col=` modifier allows you to color the plot. (Arguably, the best function within R)
+
+**Color is a tool!** If you are using multiple colors, don't just randomly color in boxes, use the color to easily distinguish between groups. 
+
+* In my plot the females are pink and the males are blue. Additionally, the alive individuals are a lighter shade and the dead individuals are a darker color.
+```{r}
+boxplot(y~x, main="Bird weight by sex and survival", ylab="Bird weight", xlab="Groups", col=c("palevioletred1","lightskyblue1", "palevioletred4", "lightskyblue4"))
+```
+
+### col=rgb()
+`col=rgb()` is more specific than the col= modifier Not to be confused with the notorious RBG, col=rgb() allows you to create custom colors by changing the proportion of red, blue and green in that color.
+
+* For example, looking at the bumpus data for male weight, I can change the color and transparancy of the graph
+
+* The values range from 0 to 1, with 1 being the most extreme and 0 being the least extreme
+```{r include=FALSE}
+females<-subset(bumpusdata, bumpusdata$sex=="female")
+```
+
+```{r}
+hist(males$wgt, col=rgb(0.1,0.5,0.792,1))
+```
+
+### add=TRUE
+Using the `add=TRUE` you can combine two histogram code lines into one graph. The add=TRUE is inserted as a modifier into the second hist(). Any modifiers to change graph (ylim, xlim, ylab, xlab, main, etc.) must be added to first histogram function
+
+This is a great way to use the col=rgb() function and change the transparancy of the histograms to see where the histograms overlap.
+In this example I am using the bumpus dataset to compare male and female bird weight.
+```{r}
+hist(females$wgt, col=rgb(0.9, 0.2, 0.32, 0.8), ylim=c(0,28), xlab=("bird weight"), main=("Histogram of male and female bird weight"))
+hist(males$wgt, add=TRUE, col=rgb(0.1, 0.5, 0.7, 0.55))
+```
+
+### segments()
+The `segments()` modifier is NOT a modifier, so it requires a new line of code to work. The function basically works by connecting two points with a straight line.
+
+* segments(X~1~, Y~1~, X~2~, Y~2~)
+* You can change the color of segments using either col=() or col=rbg()
+* lwd() changes the thickness of the line
+
+While walking long the mall, I notice there is a single male bird, the exact species that Bumpus used. What a lucky find! I take his mass. I am interested to see if the bird mass is different now from when Bumpus did his experiment **The segment line is the mean masse of the male bird I caught.**
+
+```{r}
+hist(males$wgt)
+segments(27.5,0,27.5,25, col="royalblue3", lwd=5, lty="dotted")
+```
+
+### text()
+`text()` modifier adds text to any plot
+```{r}
+hist(males$wgt)
+segments(0,10,40,10, col="forestgreen", lwd=5)
+text(29,11,"This is a line :)")
+```
+
+### legend()
+The `legend()` modifier puts a legend on your graph, telling the reader what colors are certain variables
+legend(), like segments() needs its own line beneath the histogram
+
+* Continuing with the same graph from above...
+```{r}
+hist(females$wgt, col=rgb(0.9, 0.2, 0.32, 0.8), ylim=c(0,28), xlab=("bird weight"), main=("Histogram of male and female bird weight"))
+hist(males$wgt, add=TRUE, col=rgb(0.1, 0.5, 0.792, 0.4))
+legend("topright", c("Females", "Males"), fill=c("deeppink2","royalblue3"))
+```
+
+# THAT'S ALL FOLKS!
+
+
+
